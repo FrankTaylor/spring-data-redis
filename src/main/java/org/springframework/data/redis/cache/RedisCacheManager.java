@@ -34,6 +34,7 @@ import org.springframework.cache.transaction.TransactionAwareCacheDecorator;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.core.RedisCallback;
+import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -57,7 +58,7 @@ public class RedisCacheManager extends AbstractTransactionSupportingCacheManager
 	private final Log logger = LogFactory.getLog(RedisCacheManager.class);
 
 	@SuppressWarnings("rawtypes")//
-	private final RedisTemplate template;
+	private final RedisOperations template;
 
 	private boolean usePrefix = false;
 	private RedisCachePrefix cachePrefix = new DefaultRedisCachePrefix();
@@ -270,7 +271,7 @@ public class RedisCacheManager extends AbstractTransactionSupportingCacheManager
 	}
 
 	@SuppressWarnings("rawtypes")
-	protected RedisTemplate getTemplate() {
+	protected RedisOperations getTemplate() {
 		return template;
 	}
 

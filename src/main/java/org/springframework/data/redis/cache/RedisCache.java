@@ -28,7 +28,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.connection.ReturnType;
 import org.springframework.data.redis.core.RedisCallback;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
@@ -43,7 +43,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 public class RedisCache implements Cache {
 
 	@SuppressWarnings("rawtypes")//
-	private final RedisTemplate template;
+	private final RedisOperations template;
 	private final RedisCacheMetadata cacheMetadata;
 	private final CacheValueAccessor cacheValueAccessor;
 
@@ -55,7 +55,7 @@ public class RedisCache implements Cache {
 	 * @param template
 	 * @param expiration
 	 */
-	public RedisCache(String name, byte[] prefix, RedisTemplate<? extends Object, ? extends Object> template,
+	public RedisCache(String name, byte[] prefix, RedisOperations<? extends Object, ? extends Object> template,
 			long expiration) {
 
 		hasText(name, "non-empty cache name is required");
@@ -112,7 +112,7 @@ public class RedisCache implements Cache {
 				Object value = template.getValueSerializer() != null ? template.getValueSerializer().deserialize(bs) : bs;
 				return (bs == null ? null : new RedisCacheElement(element.getKey(), value));
 			}
-		}, true);
+		});
 	}
 
 	/*
@@ -137,7 +137,7 @@ public class RedisCache implements Cache {
 	public void put(RedisCacheElement element) {
 
 		notNull(element, "Element must not be null!");
-		template.execute(new RedisCachePutCallback(element, cacheValueAccessor, cacheMetadata), true);
+		template.execute(new RedisCachePutCallback(element, cacheValueAccessor, cacheMetadata));
 	}
 
 	/*
@@ -161,8 +161,7 @@ public class RedisCache implements Cache {
 	public ValueWrapper putIfAbsent(RedisCacheElement element) {
 
 		notNull(element, "Element must not be null!");
-		return toWrapper(template.execute(new RedisCachePutIfAbsentCallback(element, cacheValueAccessor, cacheMetadata),
-				true));
+		return toWrapper(template.execute(new RedisCachePutIfAbsentCallback(element, cacheValueAccessor, cacheMetadata)));
 	}
 
 	/*
@@ -190,7 +189,7 @@ public class RedisCache implements Cache {
 	 */
 	public void clear() {
 		template.execute(cacheMetadata.usesKeyPrefix() ? new RedisCacheCleanByPrefixCallback(cacheMetadata)
-				: new RedisCacheCleanByKeysCallback(cacheMetadata), true);
+				: new RedisCacheCleanByKeysCallback(cacheMetadata));
 	}
 
 	/*
